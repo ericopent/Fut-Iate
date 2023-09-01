@@ -201,11 +201,11 @@ tab1, tab2 = st.tabs(['# Ranking All-Time', "# Ranking Mensal"])
 with tab1:
     col1, col2, col3 = st.columns(3)
     with col1:
-        pesoGols = st.number_input('Peso de Gols', min_value=0.,max_value=1., value = 0.4)
+        pesoGols = st.number_input('Peso de Gols', min_value=0.,max_value=1., value = 0.2)
     with col2:
-        pesoAssistências = st.number_input('Peso de Assistências', min_value=0.,max_value=1.,value = 0.3)
+        pesoAssistências = st.number_input('Peso de Assistências', min_value=0.,max_value=1.,value = 0.2)
     with col3:
-        pesoPresença = st.number_input('Peso de Presença', min_value=0.,max_value=1.,value = 0.3)
+        pesoPresença = st.number_input('Peso de Presença', min_value=0.,max_value=1.,value = 0.6)
         
     ranking = RankingTotal(dados,pesoGols,pesoAssistências,pesoPresença)
 
