@@ -248,7 +248,7 @@ with st.sidebar:
         
         if(nome in nome_options):
             st.error('Nome Já existe')
-        elif(nome =='):
+        elif(nome ==''):
              st.error('Adicione um Nome')
         else:
                         
