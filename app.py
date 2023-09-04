@@ -78,7 +78,7 @@ st.markdown("""
 
 def read_data(sheet = "FutIate", tab = "Ranking"):
     
-    gc = gspread.service_account(filename="client-secret-key.json")
+    gc = gspread.service_account(filename="service-account-key.json")
 
     sh = gc.open(sheet)    
     
@@ -99,7 +99,7 @@ def write_data (dados, data, nome, gols, assists, presença, sheet = "FutIate", 
         'PRESENÇA': presença
     }]
     
-    gc = gspread.service_account(filename="client-secret-key.json")
+    gc = gspread.service_account(filename="service-account-key.json")
 
     sh = gc.open(sheet)    
     
