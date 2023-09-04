@@ -246,8 +246,10 @@ with st.sidebar:
         
         nome = st.text_input('Nome a adicionar', '')
         
-        if(nome in nome_options or nome == ''):
+        if(nome in nome_options):
             st.error('Nome Já existe')
+        elif(nome =='):
+             st.error('Adicione um Nome')
         else:
                         
             gols = st.number_input('Gols', min_value=0., max_value=100., value = 0., step = 1.)
