@@ -239,13 +239,13 @@ def RankingTotal (dados, pesoGols, pesoAssists, pesoPresença):
 with st.sidebar:
     
     data = st.date_input('Data', value=datetime.datetime.today())
-    nome = st.selectbox('Nome', options=dados['NOME'].unique().append('Novo Nome'))
+    nome = st.selectbox('Nome', options=dados['NOME'].unique().tolist().append('Novo Nome'))
 
     if(nome == 'Novo Nome'):
         
         nome = st.text_input('Nome a adicionar', '')
         
-        if(nome.isin(dados['NOME'].unique())):
+        if(nome.isin(dados['NOME'].unique().tolist())):
             st.error('Nome Já existe')
         
         else:
