@@ -239,15 +239,15 @@ def RankingTotal (dados, pesoGols, pesoAssists, pesoPresença):
 with st.sidebar:
     
     data = st.date_input('Data', value=datetime.datetime.today())
-    nome = st.selectbox('Nome', options=dados['NOME'].unique().tolist().append('Novo Nome'))
-
+    nome_options = dados['NOME'].unique().tolist()
+    nome_options.append('Novo Nome')
+    nome = st.selectbox('Nome', options=nome_options)
     if(nome == 'Novo Nome'):
         
         nome = st.text_input('Nome a adicionar', '')
         
-        if(nome.isin(dados['NOME'].unique().tolist())):
-            st.error('Nome Já existe')
-        
+        if(nome in nome_options or nome == ''):
+            st.error('Nome Já existe)
         else:
                         
             gols = st.number_input('Gols', min_value=0., max_value=100., value = 0., step = 1.)
