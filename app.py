@@ -2,6 +2,22 @@ import pandas as pd
 import streamlit as st
 import datetime
 
+client_json = {
+  "type": "service_account",
+  "project_id": "futicrj",
+  "private_key_id": "7dc67f095b6bb76eae099a9981a44af552aae703",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDPJuIo+yg/0Ocr\n7vCtJT2sefNzR54AGTFFP6JSS0OigE52/Dlrlf8xewqzxICMxge9IKPOgbEeLnI7\nnZiU+G9UoLUlXiuFOL02J1UC7KikYdIzegHtinuzLcDJuCiLPM0dRSqFVLD43YHB\nPdjW2yGeU0NUpZCP+yXNSq2UK82MstLE07UkNIt4smXi9xWc+qHlAf/3PrPosUhW\nGogI1NehoOr/JFSNGBoYC3OJljlb4nKp4+7eY2pbxyA/Qti46iYuin/gQfJnL1j6\nmCcmuno3GWcnIflA9JY0iYbAuYv7OTlAIn8Ph2FPCxznFVQrSLzFENiTTPvtIiHR\nnz1WaG7BAgMBAAECggEAQ6poYsmTvrC+6ods36oUCMR3JRdmQZL5GK0uGSKTr7+o\noc5G9WE0UFXoS4trEFDZk0pXp6uOjxTN5LJYdoTmXOb39QJbRfOgPtG/P6rNdZCs\niHsYqR68xG00FdBNkhnkyGRg/NeKzWgRq+1HaPuAckaxbjN80sNPeE0mAQoD5Sqn\nfESh3dyhtT/eCfbQX1w+nLzfnNr2alURJMm5Ga6X+6PCE558z9vNVrsBUsylbRMZ\nAEGKPluSVviYaiGqqkqQ3x5ayOFV/DNK3We2XjxV7uuo3ChflzTBBxSOzKXoPU42\ndLnUEOdXXPVIuePiXZ4YZE36feyui1DscCG5RbsRPwKBgQD8wUIWQDMDJ4Qri5H8\nmDTtzumdOj0Hj0dZ/OWsvnF3VdXBI0IXqy9Dlcn4T9+TiDw3nlfNhT5wJNOFOdZO\nvWO/3f1pxekxlNvW65tbQGEofn92ZZvYuhtdkOPsy9XsPPrsXOaUJKbibBidCQxW\nSWi/f8xlG3Fu870sfvKMaKMsLwKBgQDRz71WzKIdiSg1mI1aC+Xp73CXw+TI0BJM\nzD+E1RFW4cqOmSGL6uORYHOAt3mAawx34qYp7HNWrsOKPy0dKtXzfl37tr5XdiEg\nXKBrnHYZ498tJ3d7IoHZpkPG5Namg9nXKFzAgpg3OmEpGdNwV6XiG7OSOG8cr0Is\nlpEM5UaoDwKBgQCT4ltRe4SdXtyVQddLzJ6DWaIUTUPyDWH5A+A5/z+STBWCKKf+\nAznnOFfwwoMU5gwdmrbS2BgdM17TP3Dlpyga1b70yUhUqz0pdbbzYCq4r7LSSkcy\nOknSp/jDzsu+qjtCWmTK3tsJ9ac9ElM2lUMFcLfdnH31JgVUaH5vqrV2HwKBgDNd\nFBEnz5hDd6CHVDNzLjny8DF3N48hwRkj93jhYHlQlXILcvb57fQtFJmyUQBrNIY0\n6lDhHetepWg2xyiYz//oM8HnnvlyZfGyO2OczhzQeFZpjwqKDBfoaDdM1m+1X6MY\nsnw+fF0o4ZhaRjT+gBG2jmOBhVIUZbLcuW3aw01pAoGBAOSyuQtrVYczK4WXIMeq\n6Q6lTST41ilQcY/rK35y+8Ml9lk4/lsFbT3JHJvQyOfgEll9hgYijFE5D/LXPE+v\npmqAARXxSllM0Sj39j8OvHK8y4nHAuMEZkorfm5ypUo8zjCzUrVWjm3d+geraX0/\n2n4OxPSJkOFrWL2tm5juPQM6\n-----END PRIVATE KEY-----\n",
+  "client_email": "futicrj@futicrj.iam.gserviceaccount.com",
+  "client_id": "115944344368992571371",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/futicrj%40futicrj.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}
+
+import gspread
+from gspread_dataframe import set_with_dataframe
 st.set_page_config(
     layout="wide",
     page_title = 'Fut Iate',
@@ -75,15 +91,56 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-sheet_id = '12_kJDzA7pdejayJ6Hs7tsxJ7ieaUV4-vQ7coBE1BeEM'
-sheet_name = 'Ranking'
+def read_data(sheet = "FutIate", tab = "Ranking"):
+    
+    gc = gspread.service_account(filename=r"I:\Análise de Dados\Erico\service-account-key.json")
 
-url = f'https://docs.google.com/spreadsheets/d/{sheet_id}/gviz/tq?tqx=out:csv&sheet={sheet_name}'
-dados = pd.read_csv(url)
+    sh = gc.open(sheet)    
+    
+    worksheet = sh.worksheet(tab)
+
+    df = pd.DataFrame(worksheet.get_all_records())
+
+    return(df)
+
+def write_data (dados, data, nome, gols, assists, presença, sheet = "FutIate", tab = "Ranking"):
+    
+    df = [{
+        
+        'DATA': data,
+        'NOME': nome,
+        'GOLS': gols,
+        'ASSISTÊNCIAS': assists,
+        'PRESENÇA': presença
+    }]
+    
+    gc = gspread.service_account(filename=r"I:\Análise de Dados\Erico\service-account-key.json")
+
+    sh = gc.open(sheet)    
+    
+    worksheet = sh.worksheet(tab)
+    
+    df = pd.DataFrame(df)    
+    
+    db = pd.concat([dados, df])
+    db['DATA'] = pd.to_datetime(db['DATA'])
+    
+    db['DATA'] = db['DATA'].apply(lambda x: x.strftime("%d/%m/%Y"))
+    
+    set_with_dataframe(worksheet, db)
+    # pd.concat([dados, df])
+    return()
+
+dados = read_data(sheet = "FutIate", tab = "Ranking").drop_duplicates(subset=['DATA', 'NOME'], keep = 'last')
+
+dados['DATA'] = pd.to_datetime(dados['DATA'])
 
 st.markdown(
     "# Fut Iate :crown: :trophy:"
 )
+
+
+
 
 def stable_matching(ranking):
     team_size = 5
@@ -196,6 +253,19 @@ def RankingTotal (dados, pesoGols, pesoAssists, pesoPresença):
             
         st.markdown(view.to_html(), unsafe_allow_html=True)
         return(result)
+
+with st.sidebar:
+    
+    data = st.date_input('Data', value=datetime.datetime.today())
+    nome = st.selectbox('Nome', options=dados['NOME'].unique())
+    gols = st.number_input('Gols', min_value=0., max_value=100., value = 0., step = 1.)
+    assists = st.number_input('Assistências', min_value=0., max_value=100., value = 0.,step = 1.)
+    presença = st.number_input('Presença', min_value=0., max_value=100.,value = 0.,step = 1.)
+    bt = st.button('ADD dados')
+    if bt:
+        write_data(dados.drop_duplicates(subset=['DATA', 'NOME'], keep = 'last'), data=data,nome = nome, gols=gols, assists=assists, presença=presença, sheet = "FutIate", tab = "Ranking")
+        dados = read_data(sheet='FutIate', tab='Ranking').drop_duplicates(subset=['DATA', 'NOME'], keep = 'last')
+    
 tab1, tab2 = st.tabs(['# Ranking All-Time', "# Ranking Mensal"])
 
 with tab1:
