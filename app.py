@@ -239,15 +239,35 @@ def RankingTotal (dados, pesoGols, pesoAssists, pesoPresença):
 with st.sidebar:
     
     data = st.date_input('Data', value=datetime.datetime.today())
-    nome = st.selectbox('Nome', options=dados['NOME'].unique())
-    gols = st.number_input('Gols', min_value=0., max_value=100., value = 0., step = 1.)
-    assists = st.number_input('Assistências', min_value=0., max_value=100., value = 0.,step = 1.)
-    presença = st.number_input('Presença', min_value=0., max_value=100.,value = 0.,step = 1.)
-    bt = st.button('ADD dados')
-    if bt:
-        write_data(dados.drop_duplicates(subset=['DATA', 'NOME'], keep = 'last'), data=data,nome = nome, gols=gols, assists=assists, presença=presença, sheet = "FutIate", tab = "Ranking")
-        dados = read_data(sheet='FutIate', tab='Ranking').drop_duplicates(subset=['DATA', 'NOME'], keep = 'last')
-    
+    nome = st.selectbox('Nome', options=dados['NOME'].unique().append('Novo Nome'))
+
+    if(nome == 'Novo Nome'):
+        
+        nome = st.text_input('Nome a adicionar', '')
+        
+        if(nome.isin(dados['NOME'].unique())):
+            st.error('Nome Já existe')
+        
+        else:
+                        
+            gols = st.number_input('Gols', min_value=0., max_value=100., value = 0., step = 1.)
+            assists = st.number_input('Assistências', min_value=0., max_value=100., value = 0.,step = 1.)
+            presença = st.number_input('Presença', min_value=0., max_value=100.,value = 0.,step = 1.)
+            bt = st.button('ADD dados')
+            if bt:
+                write_data(dados.drop_duplicates(subset=['DATA', 'NOME'], keep = 'last'), data=data,nome = nome, gols=gols, assists=assists, presença=presença, sheet = "FutIate", tab = "Ranking")
+                dados = read_data(sheet='FutIate', tab='Ranking').drop_duplicates(subset=['DATA', 'NOME'], keep = 'last')
+    else:
+        
+        gols = st.number_input('Gols', min_value=0., max_value=100., value = 0., step = 1.)
+        assists = st.number_input('Assistências', min_value=0., max_value=100., value = 0.,step = 1.)
+        presença = st.number_input('Presença', min_value=0., max_value=100.,value = 0.,step = 1.)
+        bt = st.button('ADD dados')
+        if bt:
+            write_data(dados.drop_duplicates(subset=['DATA', 'NOME'], keep = 'last'), data=data,nome = nome, gols=gols, assists=assists, presença=presença, sheet = "FutIate", tab = "Ranking")
+            dados = read_data(sheet='FutIate', tab='Ranking').drop_duplicates(subset=['DATA', 'NOME'], keep = 'last')
+        
+              
 tab1, tab2 = st.tabs(['# Ranking All-Time', "# Ranking Mensal"])
 
 with tab1:
