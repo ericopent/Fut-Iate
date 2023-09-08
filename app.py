@@ -76,9 +76,11 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
+service_account = "service-account-key.json"
+
 def read_data(sheet = "FutIate", tab = "Ranking"):
     
-    gc = gspread.service_account(filename="service-account-key.json")
+    gc = gspread.service_account(filename=service_account)
 
     sh = gc.open(sheet)    
     
@@ -99,7 +101,7 @@ def write_data (dados, data, nome, gols, assists, presença, sheet = "FutIate", 
         'PRESENÇA': presença
     }]
     
-    gc = gspread.service_account(filename="service-account-key.json")
+    gc = gspread.service_account(filename=service_account)
 
     sh = gc.open(sheet)    
     
@@ -221,7 +223,7 @@ def RankingTotal (dados, pesoGols, pesoAssists, pesoPresença):
 
         result.sort_values('Score', inplace=True, ascending=False)
         result.reset_index(inplace = True, drop=True)
-        result['Posição'] = result.index + 1
+        result['Posição'] = result['Score'].rank(method='min', ascending=False).astype(int)
         result = result[['NOME', 'GOLS', 'ASSISTÊNCIAS', 'PRESENÇA', 'Score', 'Posição']]
         
         result.columns = ['Nome', 'Gols', 'Assistências', 'Presença','Score', 'Posição']
@@ -235,6 +237,77 @@ def RankingTotal (dados, pesoGols, pesoAssists, pesoPresença):
             
         st.markdown(view.to_html(), unsafe_allow_html=True)
         return(result)
+
+def RankingMes (dados, pesoGols, pesoAssists, pesoPresença):
+    
+    
+    if(pesoGols + pesoAssists + pesoPresença != 1):
+        st.error('Pesos não somam 1')
+    else:
+                
+        dados['MONTH'] = dados['DATA'].dt.month
+
+        unique_months = dados['MONTH'].unique()
+
+        result = []  
+        
+        for month in unique_months:
+            data_for_month = dados[dados['MONTH'] == month]
+            
+            result_for_month = data_for_month.groupby('NOME').apply(lambda x: x.GOLS.sum() * pesoGols + x.PRESENÇA.sum() * pesoPresença + x.ASSISTÊNCIAS.sum() * pesoAssists)
+            
+            sorted_result_for_month = result_for_month.sort_values(ascending=False).reset_index().reset_index()     
+            sorted_result_for_month.columns = ['Posição', 'Nome', 'Score']
+            
+            meses = {1: 'Janeiro',
+             2: 'Fevereiro',
+             3: 'Março',
+             4: 'Abril',
+             5: 'Maio',
+             6: 'Junho',
+             7: 'Julho',
+             8: 'Agosto',
+             9: 'Setembro',
+             10: 'Outubro',
+             11: 'Novembro',
+             12: 'Dezembro'}
+            
+            
+            sorted_result_for_month['Mês'] = meses[month]
+            sorted_result_for_month['Posição'] = sorted_result_for_month['Posição']+1
+            sorted_result_for_month = sorted_result_for_month[['Mês', 'Nome', 'Posição']]
+            result.append(sorted_result_for_month)
+        
+        resultados = pd.concat(result)   
+        
+        nNomes = len(resultados['Nome'].unique())
+        resultados = resultados.pivot(index='Nome', columns='Mês', values='Posição')
+        
+        resultados['Max'] = resultados.apply(lambda x: max(x))
+        
+        for column in resultados.columns:
+            resultados['Max'] = nNomes
+            resultados[column] = resultados[column].fillna(nNomes + 1)        
+            resultados[column] = resultados[column].apply(lambda x: int(x))  
+            
+        resultados = resultados.drop('Max', axis=1)
+        resultados['Soma'] = resultados.sum(axis=1, numeric_only=True)
+        resultados = resultados.sort_values('Soma')
+        
+        resultados['Posição'] = resultados['Soma'].rank(method='min', ascending=True).astype(int)
+        
+        resultados.reset_index(inplace = True) 
+        
+        view = resultados.style.hide(axis="index")
+        
+        view.set_table_styles([
+        {'selector': "th", 'props': [("font-weight", "bold"), ("text-transform", "capitalize")]},])
+        
+        view.format(lambda x: f"<i title='tooltip'>{x}</i>", 'Posição')
+            
+        st.markdown(view.to_html(), unsafe_allow_html=True)
+        return(result)
+
 
 with st.sidebar:
     
@@ -270,7 +343,7 @@ with st.sidebar:
             dados = read_data(sheet='FutIate', tab='Ranking').drop_duplicates(subset=['DATA', 'NOME'], keep = 'last')
         
               
-tab1, tab2 = st.tabs(['# Ranking All-Time', "# Ranking Mensal"])
+tab1, tab2, tab3 = st.tabs(['# Ranking All-Time', "# Ranking Mensal", "# Ranking Agregado"])
 
 with tab1:
     col1, col2, col3 = st.columns(3)
@@ -303,8 +376,22 @@ with tab2:
         st.error('Ainda não tiveram partidas esse Mês')
     else:
         ranking = RankingTotal(dt,pesoGols1,pesoAssistências2,pesoPresença3)
+with tab3:
+        
+    st.write('Mês de Referência: ', dateRef.strftime('%m-%Y').title())
     
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        pesoGols4 = st.number_input('Peso de Gols - agregado', min_value=0.,max_value=1., value = 0.4)
+    with col2:
+        pesoAssistências5 = st.number_input('Peso de Assistências - agregado', min_value=0.,max_value=1.,value = 0.3)
+    with col3:
+        pesoPresença6 = st.number_input('Peso de Presença - agregado', min_value=0.,max_value=1.,value = 0.3)
+
+    ranking = RankingMes(dados,pesoGols4,pesoAssistências5,pesoPresença6)
+        
 with st.sidebar:
+
     with st.expander("# Head-To-Head"):
         st.markdown("## Head-to-head :rage:")
         with st.form(key="head2head"):
